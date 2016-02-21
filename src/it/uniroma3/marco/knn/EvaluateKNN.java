@@ -17,9 +17,11 @@ public class EvaluateKNN {
 	private static final String[] CLASS_COARSE = WekaAbstract.CLASS_COARSE;
 	private static final double NANO = 1000000000;
 	private KNN knn;
+	private int k;
 
-	public EvaluateKNN() {
+	public EvaluateKNN(int value_k) {
 		knn = new KNN();
+		k = value_k;
 	}
 
 	public String valuta(String pathTrain, String pathTest) {
@@ -38,18 +40,18 @@ public class EvaluateKNN {
 				if (index > 0)
 					classe = classe.substring(0, index);
 				String daValutare = Util.eliminaTesta(test);
-				String classeTrovata = knn.determinaClasse(5, daValutare);
+				String classeTrovata = knn.determinaClasse(k, daValutare);
 				int j = indexOfClass(classeTrovata);
 				int i = indexOfClass(classe);
 				confMatrix[i][j] += 1;
 			}
 			long tEndClassification = System.nanoTime();
 
-			// String strSummary = eval.toSummaryString();
-			// s.append(strSummary + "\n");
-
 			String cmString = matrixToString(confMatrix);
 			s.append(cmString + "\n");
+
+			String ciString = correct_incorrect(confMatrix);
+			s.append(ciString + "\n");
 
 			String rpfString = recall_precision_fMeasureToString(confMatrix);
 			s.append(rpfString + "\n");
@@ -67,6 +69,7 @@ public class EvaluateKNN {
 			Logger log = Logger.instance;
 			log.log("KNN" + " - " + "Albero sintattico");
 			log.log(cmString);
+			log.log(ciString);
 			log.log(rpfString);
 			log.log("Durata addestramento            : " + formatAddTime);
 			log.log("Durata valutazione              : " + formatEvaTime);
@@ -91,6 +94,36 @@ public class EvaluateKNN {
 			e.printStackTrace();
 		}
 		return testSet;
+	}
+
+	private String correct_incorrect(double[][] confMatrix) {
+		StringBuilder s = new StringBuilder();
+		String dFormat = "%1$3.2f";
+		String iFormat = "%1$5.0f";
+		Locale en = Locale.ENGLISH;
+		double totCorrect = 0;
+		double totIncorrect = 0;
+		double tot = 0;
+		for (int i = 0; i < confMatrix.length; i++) {
+			for (int j = 0; j < confMatrix[i].length; j++) {
+				if (i == j)
+					totCorrect += confMatrix[i][j];
+				if (i != j)
+					totIncorrect += confMatrix[i][j];
+				tot += confMatrix[i][j];
+			}
+		}
+		double pCorrect = (totCorrect / tot) * 100;
+		double pIncorrect = (totIncorrect / tot) * 100;
+		String tcString = String.format(en, iFormat, totCorrect);
+		String tiString = String.format(en, iFormat, totIncorrect);
+		String tString = String.format(en, iFormat, tot);
+		String pcString = String.format(en, dFormat, pCorrect);
+		String piString = String.format(en, dFormat, pIncorrect);
+		s.append("Totali corrette: " + tcString + " Percentuale: " + pcString + "%\n");
+		s.append("Totali errate  : " + tiString + " Percentuale: " + piString + "%\n");
+		s.append("Totali         : " + tString + "\n");
+		return s.toString();
 	}
 
 	private String recall_precision_fMeasureToString(double[][] confMatrix) {

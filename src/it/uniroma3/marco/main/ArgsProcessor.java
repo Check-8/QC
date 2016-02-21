@@ -8,26 +8,30 @@ public class ArgsProcessor {
 	public static final String TRAINSET_KEY = "key_train";
 	public static final String TESTSET_KEY = "key_test";
 	public static final String TAGGED_TRAINSET_KEY = "key_tag_train";
-	public static final String TAGGED_TESTSET_KEY = "key_tag_train";
+	public static final String TAGGED_TESTSET_KEY = "key_tag_test";
 	public static final String TREE_TRAINSET_KEY = "key_tree_train";
-	public static final String TREE_TESTSET_KEY = "key_tree_train";
+	public static final String TREE_TESTSET_KEY = "key_tree_test";
+	public static final String KNN_K = "key_knn";
 
-	private static final String DEFAULT_TRAININGSET_PATH = "train.txt";
-	private static final String DEFAULT_TESTSET_PATH = "test.txt";
+	private static final String DEFAULT_TRAININGSET_PATH = "res/train.txt";
+	private static final String DEFAULT_TESTSET_PATH = "res/test.txt";
 
-	private static final String TAGGED_TRAININGSET_PATH = "taggedTrain.txt";
-	private static final String TAGGED_TESTSET_PATH = "taggedTest.txt";
+	private static final String TAGGED_TRAININGSET_PATH = "res/taggedTrain.txt";
+	private static final String TAGGED_TESTSET_PATH = "res/taggedTest.txt";
 
-	private static final String TREE_TRAININGSET_PATH = "treeTrain.txt";
-	private static final String TREE_TESTSET_PATH = "treeTest.txt";
+	private static final String TREE_TRAININGSET_PATH = "res/treeTrain.txt";
+	private static final String TREE_TESTSET_PATH = "res/treeTest.txt";
+
+	private static final String DEFAULT_KNN = "5";
 
 	private static final String TRAIN_PARAM = "-train";
 	private static final String TEST_PARAM = "-test";
+	private static final String KNN_PARAM = "-k";
 
 	private static final String MSG_ERROR_DEFAULT = "Usato valore di default.";
 	private static final String MSG_ERROR_INVALID_PATH = "[path] non valido.";
+	private static final String MSG_ERROR_INVALID_K = "[val] deve essere un intero positivo";
 	private static final String MSG_INCORRECT = "Uso corretto: ";
-
 	private Map<String, String> prop;
 
 	public ArgsProcessor() {
@@ -40,6 +44,8 @@ public class ArgsProcessor {
 
 		prop.put(TREE_TRAINSET_KEY, TREE_TRAININGSET_PATH);
 		prop.put(TREE_TESTSET_KEY, TREE_TESTSET_PATH);
+
+		prop.put(KNN_K, DEFAULT_KNN);
 	}
 
 	public void processaArgomenti(String[] args) {
@@ -72,6 +78,23 @@ public class ArgsProcessor {
 						setProp(TESTSET_KEY, temp);
 					else {
 						System.err.println(MSG_ERROR_INVALID_PATH + " " + MSG_ERROR_DEFAULT);
+					}
+				}
+			}
+			if (arg.equals(KNN_PARAM)) {
+				i++;
+				if (i >= args.length) {
+					System.err.println(MSG_INCORRECT + TEST_PARAM + " [val]");
+					System.err.println(MSG_ERROR_DEFAULT);
+				} else {
+					String temp = args[i];
+					try {
+						Integer num = Integer.parseInt(temp);
+						if (num <= 0)
+							throw new NumberFormatException("Numero negativo o zero");
+						setProp(KNN_K, temp);
+					} catch (NumberFormatException e) {
+						System.err.println(MSG_ERROR_INVALID_K + " " + MSG_ERROR_DEFAULT);
 					}
 				}
 			}

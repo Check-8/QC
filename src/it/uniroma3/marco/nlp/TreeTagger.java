@@ -9,7 +9,6 @@ import java.util.Scanner;
 
 import edu.stanford.nlp.parser.lexparser.LexicalizedParser;
 import edu.stanford.nlp.trees.Tree;
-import it.uniroma3.marco.knn.KNN;
 import it.uniroma3.marco.util.Util;
 
 public class TreeTagger {
@@ -31,27 +30,6 @@ public class TreeTagger {
 					fw.write(head + " " + senTree.toString() + "\n");
 				}
 			}
-		} catch (FileNotFoundException e) {
-			e.printStackTrace();
-		} catch (IOException e) {
-			e.printStackTrace();
-		}
-	}
-
-	public static void main(String[] args) {
-		TreeTagger tt = new TreeTagger();
-		tt.makeTree("test.txt", "treeTest.txt");
-		KNN knn = new KNN();
-		knn.training("treeTest.txt");
-		try (FileReader fr = new FileReader("treeTest.txt"); Scanner scan = new Scanner(fr)) {
-			while (scan.hasNextLine()) {
-				String sentence = scan.nextLine();
-				String daValutare = Util.eliminaTesta(sentence);
-				String classe = Util.soloTesta(sentence);
-				String classeTrovata = knn.determinaClasse(5, daValutare);
-				System.out.println(classe + " " + classeTrovata);
-			}
-
 		} catch (FileNotFoundException e) {
 			e.printStackTrace();
 		} catch (IOException e) {

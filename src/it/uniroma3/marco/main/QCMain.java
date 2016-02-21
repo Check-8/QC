@@ -238,7 +238,8 @@ public class QCMain {
 					tagger.makeTree(qc.testpath, qc.tree_testpath);
 				}
 				System.out.println("Esecuzione avviata");
-				EvaluateKNN eval = new EvaluateKNN();
+				Integer k = Integer.parseInt(qc.aP.getProp(ArgsProcessor.KNN_K));
+				EvaluateKNN eval = new EvaluateKNN(k);
 				String s = eval.valuta(qc.tree_trainpath, qc.tree_testpath);
 				System.out.println(s);
 			}

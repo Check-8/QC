@@ -10,25 +10,7 @@ import java.util.List;
 import java.util.Locale;
 import java.util.Scanner;
 
-import it.uniroma3.marco.nlp.POSTagger;
-import it.uniroma3.marco.weka.WekaAbstract;
-import it.uniroma3.marco.weka.WekaWhWord;
-import it.uniroma3.marco.weka.WekaWhWordBigrammaPos;
-import it.uniroma3.marco.weka.WekaWhWordNomiAggettivi;
-import it.uniroma3.marco.weka.WekaWhWordNomiAggettiviVerbi;
-import it.uniroma3.marco.weka.WekaWhWordParoleConTag;
-import it.uniroma3.marco.weka.WekaWhWordPosSet;
-import it.uniroma3.marco.weka.WekaWhWordPosSetParoleConTag;
-import it.uniroma3.marco.weka.WekaWhWordPosString;
-import it.uniroma3.marco.weka.WekaWhWordPosTagWord;
-import it.uniroma3.marco.weka.WekaWhWordVerbi;
-import it.uniroma3.marco.weka.classificatori.Classificatore;
-import weka.classifiers.bayes.NaiveBayes;
-import weka.classifiers.functions.SMO;
-import weka.classifiers.trees.J48;
-
 public class ElabText {
-	// TODO Migliorabile, fare in parallelo
 	public List<Vettore> elaboraFile(String path) {
 		File f = new File(path);
 		if (!f.exists() || !f.canRead())
@@ -210,78 +192,4 @@ public class ElabText {
 		return false;
 	}
 
-	public static void main(String[] args) {
-		if (!new File("tagged.txt").exists()) {
-			POSTagger tagger = new POSTagger();
-			tagger.taggaFile("train.txt", "tagged.txt");
-		}
-		if (!new File("taggedTest.txt").exists()) {
-			POSTagger tagger = new POSTagger();
-			tagger.taggaFile("test.txt", "taggedTest.txt");
-		}
-		ElabText elab = new ElabText();
-		List<Vettore> vetTrain = elab.elaboraFile("tagged.txt");
-		List<Vettore> vetTest = elab.elaboraFile("taggedTest.txt");
-
-		List<Classificatore> listClassificatori = new ArrayList<>();
-		listClassificatori.add(new Classificatore("J48", J48.class));
-		listClassificatori.add(new Classificatore("Naive Bayes", NaiveBayes.class));
-		listClassificatori.add(new Classificatore("SMO - Sequential minimal optimization", SMO.class));
-
-		// List<WekaAbstract> daEseguire = new LinkedList<>();
-		// for (WekaAbstract wa : daEseguire) {
-		// wa.classifica(vetTrain, vetTest);
-		// }
-
-		WekaAbstract whw = new WekaWhWord();
-		whw.setClassificatori(listClassificatori);
-
-		WekaAbstract whwptw = new WekaWhWordPosTagWord();
-		whwptw.setClassificatori(listClassificatori);
-
-		WekaAbstract whwpt = new WekaWhWordPosSet();
-		whwpt.setClassificatori(listClassificatori);
-
-		WekaAbstract whwps = new WekaWhWordPosString();
-		whwps.setClassificatori(listClassificatori);
-
-		WekaAbstract whwpct = new WekaWhWordParoleConTag();
-		whwpct.setClassificatori(listClassificatori);
-
-		WekaAbstract whwpspct = new WekaWhWordPosSetParoleConTag();
-		whwpspct.setClassificatori(listClassificatori);
-
-		WekaAbstract whwnnjj = new WekaWhWordNomiAggettivi();
-		whwnnjj.setClassificatori(listClassificatori);
-
-		WekaAbstract whwvb = new WekaWhWordVerbi();
-		whwvb.setClassificatori(listClassificatori);
-
-		WekaAbstract whwnnjjvb = new WekaWhWordNomiAggettiviVerbi();
-		whwnnjjvb.setClassificatori(listClassificatori);
-
-		WekaAbstract whwbpt = new WekaWhWordBigrammaPos();
-		whwbpt.setClassificatori(listClassificatori);
-
-		whw.classifica(vetTrain, vetTest);
-		whw = null;
-		// whwps.classifica(vetTrain, vetTest);
-		// whwps = null;
-		whwpt.classifica(vetTrain, vetTest);
-		whwpt = null;
-		// whwptw.classifica(vetTrain, vetTest);
-		// whwptw = null;
-		// whwpct.classifica(vetTrain, vetTest);
-		// whwpct = null;
-		// whwpspct.classifica(vetTrain, vetTest);
-		// whwpspct = null;
-		// whwnnjj.classifica(vetTrain, vetTest);
-		// whwnnjj = null;
-		// whwvb.classifica(vetTrain, vetTest);
-		// whwvb = null;
-		// whwnnjjvb.classifica(vetTrain, vetTest);
-		// whwnnjjvb = null;
-		// whwbpt.classifica(vetTrain, vetTest);
-		// whwbpt = null;
-	}
 }
