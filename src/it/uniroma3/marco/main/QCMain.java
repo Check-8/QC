@@ -1,4 +1,4 @@
-package it.uniroma3.marco;
+package it.uniroma3.marco.main;
 
 import java.io.File;
 import java.util.ArrayList;
@@ -10,6 +10,8 @@ import java.util.NoSuchElementException;
 import java.util.Scanner;
 import java.util.Set;
 
+import it.uniroma3.marco.ElabText;
+import it.uniroma3.marco.Vettore;
 import it.uniroma3.marco.knn.EvaluateKNN;
 import it.uniroma3.marco.nlp.POSTagger;
 import it.uniroma3.marco.nlp.TreeTagger;
@@ -33,23 +35,29 @@ import weka.classifiers.functions.SMO;
 import weka.classifiers.trees.J48;
 
 public class QCMain {
-	private static final String DEFAULT_TRAININGSET_PATH = "train.txt";
-	private static final String DEFAULT_TESTSET_PATH = "test.txt";
-
-	private static final String TAGGED_TRAININGSET_PATH = "taggedTrain.txt";
-	private static final String TAGGED_TESTSET_PATH = "taggedTest.txt";
-
-	private static final String TREE_TRAININGSET_PATH = "treeTrain.txt";
-	private static final String TREE_TESTSET_PATH = "treeTest.txt";
 
 	private String trainpath;
 	private String testpath;
 
+	private String tag_trainpath;
+	private String tag_testpath;
+
+	private String tree_trainpath;
+	private String tree_testpath;
+
 	private Scanner scan;
+	private ArgsProcessor aP;
 
 	public QCMain() {
-		trainpath = DEFAULT_TRAININGSET_PATH;
-		testpath = DEFAULT_TESTSET_PATH;
+		aP = new ArgsProcessor();
+		trainpath = aP.getProp(ArgsProcessor.TRAINSET_KEY);
+		testpath = aP.getProp(ArgsProcessor.TESTSET_KEY);
+
+		tag_trainpath = aP.getProp(ArgsProcessor.TAGGED_TRAINSET_KEY);
+		tag_testpath = aP.getProp(ArgsProcessor.TAGGED_TESTSET_KEY);
+
+		tree_trainpath = aP.getProp(ArgsProcessor.TREE_TRAINSET_KEY);
+		tree_testpath = aP.getProp(ArgsProcessor.TREE_TESTSET_KEY);
 	}
 
 	private void printMenu() {
@@ -191,21 +199,24 @@ public class QCMain {
 
 	public static void main(String[] args) {
 		QCMain qc = new QCMain();
+		if (args.length > 0) {
+			qc.aP.processaArgomenti(args);
+		}
 		try {
 			qc.scan = new Scanner(System.in);
 			int tipo = qc.sceltaTipoTest();
 			if (tipo == 0) {
-				if (!new File(TAGGED_TRAININGSET_PATH).exists()) {
+				if (!new File(qc.tag_trainpath).exists()) {
 					POSTagger tagger = new POSTagger();
-					tagger.taggaFile(qc.trainpath, TAGGED_TRAININGSET_PATH);
+					tagger.taggaFile(qc.trainpath, qc.tag_trainpath);
 				}
-				if (!new File(TAGGED_TESTSET_PATH).exists()) {
+				if (!new File(qc.tag_testpath).exists()) {
 					POSTagger tagger = new POSTagger();
-					tagger.taggaFile(qc.testpath, TAGGED_TESTSET_PATH);
+					tagger.taggaFile(qc.testpath, qc.tag_testpath);
 				}
 				ElabText elab = new ElabText();
-				List<Vettore> vetTrain = elab.elaboraFile(TAGGED_TRAININGSET_PATH);
-				List<Vettore> vetTest = elab.elaboraFile(TAGGED_TESTSET_PATH);
+				List<Vettore> vetTrain = elab.elaboraFile(qc.tag_trainpath);
+				List<Vettore> vetTest = elab.elaboraFile(qc.tag_testpath);
 
 				List<Classificatore> listClassificatori = new ArrayList<>();
 				listClassificatori.add(new Classificatore("J48", J48.class));
@@ -218,17 +229,17 @@ public class QCMain {
 					wa.classifica(vetTrain, vetTest);
 				}
 			} else if (tipo == 1) {
-				if (!new File(TREE_TRAININGSET_PATH).exists()) {
+				if (!new File(qc.tree_trainpath).exists()) {
 					TreeTagger tagger = new TreeTagger();
-					tagger.makeTree(qc.trainpath, TREE_TRAININGSET_PATH);
+					tagger.makeTree(qc.trainpath, qc.tree_trainpath);
 				}
-				if (!new File(TREE_TESTSET_PATH).exists()) {
+				if (!new File(qc.tree_testpath).exists()) {
 					TreeTagger tagger = new TreeTagger();
-					tagger.makeTree(qc.testpath, TREE_TESTSET_PATH);
+					tagger.makeTree(qc.testpath, qc.tree_testpath);
 				}
 				System.out.println("Esecuzione avviata");
 				EvaluateKNN eval = new EvaluateKNN();
-				String s = eval.valuta(TREE_TRAININGSET_PATH, TREE_TESTSET_PATH);
+				String s = eval.valuta(qc.tree_trainpath, qc.tree_testpath);
 				System.out.println(s);
 			}
 		} finally {
